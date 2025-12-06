@@ -1,0 +1,1493 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>日语五十音学习（平假名）· 优化助记版</title>
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+
+    <!-- Theme Color -->
+    <meta name="theme-color" content="#007AFF">
+    <meta name="description" content="日语五十音学习工具 - 平假名优化助记版">
+
+    <!-- iOS 特定配置 -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="五十音">
+
+    <!-- iOS 图标 -->
+    <link rel="apple-touch-icon" href="icons/icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="icons/icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180x180.png">
+
+    <!-- iOS 启动画面 -->
+    <link rel="apple-touch-startup-image" href="icons/icon-512x512.png">
+
+    <!-- 标准 Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="icons/icon-16x16.png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+            background: #f5f5f7;
+            min-height: 100vh;
+            padding: 40px 20px;
+            color: #1d1d1f;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #1d1d1f;
+            margin-bottom: 12px;
+            font-size: 3em;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #86868b;
+            margin-bottom: 40px;
+            font-size: 1.2em;
+            font-weight: 400;
+        }
+
+        /* 功能按钮区域 */
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-bottom: 50px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            background: white;
+            border: none;
+            border-radius: 24px;
+            padding: 16px 32px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #1d1d1f;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            border: 0.5px solid rgba(0, 0, 0, 0.04);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+            background: #fbfbfd;
+        }
+
+        .action-btn:active {
+            transform: scale(0.98);
+        }
+
+        .action-btn.primary {
+            background: #007AFF;
+            color: white;
+        }
+
+        .action-btn.primary:hover {
+            background: #0051D5;
+        }
+
+        .action-btn.active {
+            background: #007AFF;
+            color: white;
+            border-color: #007AFF;
+        }
+
+        .action-btn.active:hover {
+            background: #0051D5;
+            border-color: #0051D5;
+        }
+
+        .action-btn .badge {
+            background: rgba(255, 59, 48, 0.15);
+            color: #FF3B30;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .hiragana-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 12px;
+            margin-bottom: 60px;
+        }
+
+        .hiragana-card {
+            background: white;
+            border-radius: 18px;
+            padding: 28px 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            border: 0.5px solid rgba(0, 0, 0, 0.04);
+            position: relative;
+        }
+
+        .hiragana-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+            background: #fbfbfd;
+        }
+
+        .hiragana-card:active {
+            transform: scale(0.98);
+        }
+
+        .hiragana-card.error-mark::after {
+            content: '!';
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #FF3B30;
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .hiragana-char {
+            font-size: 48px;
+            font-weight: 600;
+            color: #1d1d1f;
+            margin-bottom: 6px;
+            letter-spacing: -0.5px;
+        }
+
+        .hiragana-roma {
+            font-size: 15px;
+            color: #86868b;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        /* Modal 样式 */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 1000;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            animation: fadeIn 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+            border-radius: 28px;
+            padding: 48px 40px;
+            max-width: 480px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            animation: slideUp 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            border: 0.5px solid rgba(255, 255, 255, 0.6);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(120, 120, 128, 0.16);
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            color: #1d1d1f;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 300;
+        }
+
+        .close-btn:hover {
+            background: rgba(120, 120, 128, 0.24);
+            transform: scale(1.05);
+        }
+
+        .close-btn:active {
+            transform: scale(0.95);
+        }
+
+        .modal-char {
+            font-size: 96px;
+            text-align: center;
+            color: #1d1d1f;
+            margin-bottom: 16px;
+            font-weight: 600;
+            letter-spacing: -1px;
+        }
+
+        .modal-roma {
+            text-align: center;
+            font-size: 24px;
+            color: #86868b;
+            margin-bottom: 40px;
+            font-weight: 500;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .modal-section {
+            margin-bottom: 24px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.02);
+            border-radius: 16px;
+            border: 0.5px solid rgba(0, 0, 0, 0.04);
+        }
+
+        .modal-section:last-of-type {
+            margin-bottom: 0;
+        }
+
+        .modal-section.highlight-section {
+            background: rgba(255, 149, 0, 0.08);
+            border: 1px solid rgba(255, 149, 0, 0.3);
+        }
+
+        .modal-label {
+            font-size: 13px;
+            color: #86868b;
+            margin-bottom: 10px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .modal-text {
+            font-size: 17px;
+            color: #1d1d1f;
+            line-height: 1.5;
+            font-weight: 400;
+        }
+
+        .confusion-item {
+            margin-bottom: 12px;
+            padding-left: 8px;
+        }
+
+        .confusion-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .confusion-char {
+            font-size: 24px;
+            font-weight: 600;
+            color: #1d1d1f;
+            margin-right: 8px;
+        }
+
+        .confusion-char-link {
+            font-size: 24px;
+            font-weight: 600;
+            color: #007AFF;
+            margin-right: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s;
+            border-bottom: 1px solid transparent;
+        }
+
+        .confusion-char-link:hover {
+            color: #0051D5;
+            border-bottom-color: #0051D5;
+        }
+
+        .confusion-reason {
+            font-size: 16px;
+            color: #1d1d1f;
+            line-height: 1.6;
+        }
+
+        .highlight-parts-list {
+            font-size: 17px;
+            color: #1d1d1f;
+            line-height: 1.8;
+        }
+
+        .highlight-parts-item {
+            display: inline-block;
+            background: rgba(0, 122, 255, 0.1);
+            padding: 4px 12px;
+            border-radius: 8px;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        /* 随机检查模式 */
+        .quiz-container {
+            text-align: center;
+        }
+
+        .quiz-question {
+            font-size: 18px;
+            color: #86868b;
+            margin-bottom: 16px;
+            font-weight: 500;
+        }
+
+        .quiz-target {
+            font-size: 64px;
+            color: #1d1d1f;
+            margin-bottom: 24px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .quiz-options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .quiz-option {
+            background: rgba(0, 0, 0, 0.02);
+            border: 2px solid rgba(0, 0, 0, 0.08);
+            border-radius: 16px;
+            padding: 20px;
+            font-size: 36px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 600;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .quiz-option:hover {
+            background: rgba(0, 0, 0, 0.04);
+            transform: scale(1.02);
+        }
+
+        .quiz-option:active {
+            transform: scale(0.98);
+        }
+
+        .quiz-option.correct {
+            background: rgba(52, 199, 89, 0.15);
+            border-color: #34C759;
+            color: #34C759;
+        }
+
+        .quiz-option.wrong {
+            background: rgba(255, 59, 48, 0.15);
+            border-color: #FF3B30;
+            color: #FF3B30;
+        }
+
+        .quiz-option.disabled {
+            pointer-events: none;
+            opacity: 0.5;
+        }
+
+        .quiz-option-char {
+            font-size: 36px;
+            font-weight: 600;
+        }
+
+        .quiz-option-roma {
+            font-size: 14px;
+            color: #86868b;
+            font-weight: 500;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            letter-spacing: 0.5px;
+        }
+
+        .quiz-option.show-roma .quiz-option-roma {
+            opacity: 1;
+        }
+
+        .quiz-option.correct .quiz-option-roma {
+            color: #34C759;
+        }
+
+        .quiz-option.wrong .quiz-option-roma {
+            color: #FF3B30;
+        }
+
+        .quiz-result {
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .quiz-result.correct {
+            background: rgba(52, 199, 89, 0.15);
+            color: #34C759;
+        }
+
+        .quiz-result.wrong {
+            background: rgba(255, 59, 48, 0.15);
+            color: #FF3B30;
+        }
+
+        .quiz-result.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .quiz-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 16px;
+            padding: 16px;
+            background: rgba(0, 0, 0, 0.02);
+            border-radius: 16px;
+        }
+
+        .quiz-stat {
+            text-align: center;
+        }
+
+        .quiz-stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1d1d1f;
+        }
+
+        .quiz-stat-label {
+            font-size: 12px;
+            color: #86868b;
+            margin-top: 2px;
+        }
+
+        .quiz-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .quiz-btn {
+            flex: 1;
+            background: white;
+            border: 2px solid rgba(0, 0, 0, 0.08);
+            border-radius: 16px;
+            padding: 14px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .quiz-btn:hover {
+            background: rgba(0, 0, 0, 0.02);
+        }
+
+        .quiz-btn.primary {
+            background: #007AFF;
+            color: white;
+            border-color: #007AFF;
+        }
+
+        .quiz-btn.primary:hover {
+            background: #0051D5;
+            border-color: #0051D5;
+        }
+
+        /* 错题本样式 */
+        .error-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .error-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            background: rgba(0, 0, 0, 0.02);
+            border-radius: 12px;
+            margin-bottom: 12px;
+        }
+
+        .error-item-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .error-char {
+            font-size: 36px;
+            font-weight: 600;
+        }
+
+        .error-info {
+            text-align: left;
+        }
+
+        .error-roma {
+            font-size: 16px;
+            color: #86868b;
+            margin-bottom: 4px;
+        }
+
+        .error-count {
+            font-size: 13px;
+            color: #FF3B30;
+            font-weight: 600;
+        }
+
+        .error-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .error-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .error-btn.review {
+            background: rgba(0, 122, 255, 0.15);
+            color: #007AFF;
+        }
+
+        .error-btn.remove {
+            background: rgba(120, 120, 128, 0.16);
+            color: #1d1d1f;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #86868b;
+        }
+
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .empty-text {
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        /* 统计页面 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: rgba(0, 0, 0, 0.02);
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 48px;
+            font-weight: 700;
+            color: #1d1d1f;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 15px;
+            color: #86868b;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.98);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 24px 16px;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            .subtitle {
+                font-size: 1em;
+                margin-bottom: 30px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .action-btn {
+                justify-content: center;
+            }
+
+            .hiragana-grid {
+                grid-template-columns: repeat(auto-fill, minmax(75px, 1fr));
+                gap: 10px;
+            }
+
+            .hiragana-card {
+                padding: 20px 10px;
+            }
+
+            .hiragana-char {
+                font-size: 40px;
+            }
+
+            .modal-content {
+                padding: 36px 24px;
+                border-radius: 24px;
+            }
+
+            .modal-char {
+                font-size: 72px;
+            }
+
+            .modal-roma {
+                font-size: 20px;
+                margin-bottom: 32px;
+            }
+
+            .quiz-target {
+                font-size: 52px;
+                min-height: 70px;
+            }
+
+            .quiz-options {
+                grid-template-columns: 1fr;
+            }
+
+            .quiz-option {
+                padding: 16px;
+            }
+
+            .quiz-option-char {
+                font-size: 32px;
+            }
+
+            .quiz-option-roma {
+                font-size: 13px;
+            }
+
+            .quiz-stat-value {
+                font-size: 24px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .footer {
+            text-align: center;
+            color: #86868b;
+            margin-top: 60px;
+            font-size: 15px;
+            font-weight: 400;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>日语五十音学习</h1>
+        <div class="subtitle">平假名 · Hiragana · 优化助记版</div>
+
+        <!-- 功能按钮 -->
+        <div class="action-buttons">
+            <button class="action-btn primary" onclick="startQuiz()">
+                <span>随机检查</span>
+            </button>
+            <button class="action-btn" id="confusionTrainingBtn" onclick="toggleConfusionTraining()">
+                <span id="confusionTrainingText">混淆训练：关闭</span>
+            </button>
+            <button class="action-btn" onclick="showErrorBook()">
+                <span>错题本</span>
+                <span class="badge" id="errorBadge" style="display: none;">0</span>
+            </button>
+            <button class="action-btn" onclick="showStats()">
+                <span>学习统计</span>
+            </button>
+        </div>
+
+        <div class="hiragana-grid" id="hiraganaGrid"></div>
+        <div class="footer">点击任意假名查看为中文母语者设计的记忆技巧</div>
+    </div>
+
+    <!-- 详情 Modal -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+            <div class="modal-char" id="modalChar"></div>
+            <div class="modal-roma" id="modalRoma"></div>
+            <div class="modal-section" id="modalHighlightSection" style="display: none;">
+                <div class="modal-label">易混淆提示</div>
+                <div class="modal-text" id="modalHighlight"></div>
+            </div>
+            <div class="modal-section" id="modalHighlightPartsSection" style="display: none;">
+                <div class="modal-label">关键笔画提示</div>
+                <div class="highlight-parts-list" id="modalHighlightParts"></div>
+            </div>
+            <div class="modal-section" id="modalConfusionsSection" style="display: none;">
+                <div class="modal-label">易混淆假名</div>
+                <div id="modalConfusions"></div>
+            </div>
+            <div class="modal-section">
+                <div class="modal-label">记忆技巧</div>
+                <div class="modal-text" id="modalMemory"></div>
+            </div>
+            <div class="modal-section">
+                <div class="modal-label">形状解读</div>
+                <div class="modal-text" id="modalShape"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 随机检查 Modal -->
+    <div class="modal-overlay" id="quizModal">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <button class="close-btn" onclick="closeQuizModal()">&times;</button>
+            <div class="quiz-container">
+                <div class="quiz-question" id="quizModeLabel">请选择正确的假名</div>
+                <div class="quiz-target" id="quizTarget"></div>
+                <div class="quiz-options" id="quizOptions"></div>
+                <div class="quiz-result hidden" id="quizResult"></div>
+                <div class="quiz-stats">
+                    <div class="quiz-stat">
+                        <div class="quiz-stat-value" id="quizCorrect">0</div>
+                        <div class="quiz-stat-label">正确</div>
+                    </div>
+                    <div class="quiz-stat">
+                        <div class="quiz-stat-value" id="quizWrong">0</div>
+                        <div class="quiz-stat-label">错误</div>
+                    </div>
+                    <div class="quiz-stat">
+                        <div class="quiz-stat-value" id="quizAccuracy">0%</div>
+                        <div class="quiz-stat-label">正确率</div>
+                    </div>
+                </div>
+                <div class="quiz-actions">
+                    <button class="quiz-btn" onclick="closeQuizModal()">结束</button>
+                    <button class="quiz-btn primary" onclick="nextQuestion()" id="nextBtn">下一题</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 错题本 Modal -->
+    <div class="modal-overlay" id="errorModal">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <button class="close-btn" onclick="closeErrorModal()">&times;</button>
+            <h2 style="text-align: center; margin-bottom: 24px; font-size: 28px;">错题本</h2>
+            <div id="errorContent"></div>
+            <div style="margin-top: 24px; text-align: center;">
+                <button class="quiz-btn" onclick="closeErrorModal()">关闭</button>
+                <button class="quiz-btn" onclick="clearAllErrors()" style="background: #FF3B30; color: white; border-color: #FF3B30; margin-left: 12px;">清空错题本</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 统计 Modal -->
+    <div class="modal-overlay" id="statsModal">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <button class="close-btn" onclick="closeStatsModal()">&times;</button>
+            <h2 style="text-align: center; margin-bottom: 24px; font-size: 28px;">学习统计</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="statTotal">0</div>
+                    <div class="stat-label">总测试次数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="statCorrect">0</div>
+                    <div class="stat-label">正确次数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="statWrong">0</div>
+                    <div class="stat-label">错误次数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="statAccuracy">0%</div>
+                    <div class="stat-label">总正确率</div>
+                </div>
+            </div>
+            <div style="margin-top: 24px; text-align: center;">
+                <button class="quiz-btn" onclick="closeStatsModal()">关闭</button>
+                <button class="quiz-btn" onclick="resetStats()" style="background: #FF3B30; color: white; border-color: #FF3B30; margin-left: 12px;">重置统计</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 平假名数据
+        let currentIndex = null;
+        let confusionTrainingMode = false;
+
+        // 易混淆假名列表（用于混淆训练模式）
+        const confusionCharList = ["ね", "れ", "わ", "さ", "ち", "ま", "ほ", "ら", "ろ", "る", "り"];
+
+        const hiraganaData = {
+            // あ行
+            "あ": {"roma": "a", "memory": "像一个人张开双臂大喊「啊」，发音就是 a。", "shape": "左边是身体，右边两笔像张开的手和嘴。"},
+            "い": {"roma": "i", "memory": "两条细线挤在一起，像两个字母 i 并排，读音就是 i。", "shape": "两根细长竖线并排站着。"},
+            "う": {"roma": "u", "memory": "像嘴巴往下凹着在「呜呜」地叫，发音 u 很贴脸。", "shape": "一短横在上，一条弯线像鸟嘴往下戳。"},
+            "え": {"roma": "e", "memory": "上面像三叉展开，说「诶」的时候两手摊开比划的感觉。", "shape": "上方分叉，下面收拢成一笔。"},
+            "お": {"roma": "o", "memory": "在「あ」的基础上多绕一圈，就像从「啊」收成圆口的 o。", "shape": "左边竖线，右边一大圈收回去。"},
+
+            // か行
+            "か": {"roma": "ka", "memory": "左边像汉字「力」的简写，联想到用力「卡住」的 ka。", "shape": "一竖一小勾像力字，右边伸出一横一撇。"},
+            "き": {"roma": "ki", "memory": "整形像一把钥匙 key，发音 ki，钥匙帮你「开启」日语。", "shape": "三条短横叠在竖线上，像钥匙的齿。"},
+            "く": {"roma": "ku", "memory": "像嘴角下撇在「哭（ku）」的样子，一弯整段。", "shape": "简单的一笔弯钩，张开的嘴角。"},
+            "け": {"roma": "ke", "memory": "像一扇立着的门，右边那一撇像门把手，「开 ke」门的感觉。", "shape": "左竖为门框，右边一横一斜像门把。"},
+            "こ": {"roma": "ko", "memory": "两条横线叠在一起，像 co-co 两个音排队，读 ko。", "shape": "非常规整的上下两条短横。"},
+
+            // さ行
+            "さ": {
+                "roma": "sa",
+                "memory": "像从上往下撒东西的动作，「撒」和 sa 发音接近。",
+                "shape": "顶上一横，下面一长弧像撒落的轨迹。",
+                "highlightParts": ["向下撒落的大弧"],
+                "confusions": [
+                    {"char": "ち", "reason": "ち 像写弯的数字5，而 さ 的弧线像在'撒'下去，关键差异：形状弯曲方向不同"}
+                ]
+            },
+            "し": {"roma": "shi", "memory": "像一根插进杯子里的吸管，「吸（xī）」口型一变就是日语的 shi。", "shape": "从上到下的弯线，像直直插下去略微弯曲的吸管。"},
+            "す": {"roma": "su", "memory": "线条扭成一圈再勾出去，像写得很快的「速」的一笔，联想「速度 su」。", "shape": "顶上一点，下面弯成圈再甩出尾巴。"},
+            "せ": {"roma": "se", "memory": "整体很像汉字「世」的草写版，日语「世界」读 せかい。", "shape": "上横下横，中间竖钩连在一起。"},
+            "そ": {"roma": "so", "memory": "像缝衣服时的针线钩住布，「搜 so」着把线带过去。", "shape": "一笔画出的弯钩，尾巴向上挑。"},
+
+            // た行
+            "た": {"roma": "ta", "memory": "顶部像字母 t 的横和竖，读 ta，联想「他 ta」这个音。", "shape": "上横加竖，再添右下的一撇。"},
+            "ち": {
+                "roma": "chi",
+                "memory": "像写弯了的数字 5，记成「5 吃 chi 掉了头」。",
+                "shape": "一圈一弯，整体像个扭曲的 5。",
+                "highlightParts": ["数字5型弯曲"],
+                "confusions": [
+                    {"char": "さ", "reason": "さ 的弧线像在'撒'下去，而 ち 像写弯的数字5，关键差异：形状弯曲方向不同"}
+                ]
+            },
+            "つ": {"roma": "tsu", "memory": "像三滴水往下掉的轨迹，想象水落下时发「滋 tsu」的一声。", "shape": "三条短线排成弧形向下倾斜。"},
+            "て": {"roma": "te", "memory": "日语里「手」就读 て，形状像伸出去的一只手。", "shape": "一条弯线伸向右边，再接一条短横像手掌。"},
+            "と": {"roma": "to", "memory": "像一根钉子或尖刀戳进东西里，让人喊一声「痛 to」。", "shape": "左边一小撇，右边一长钩向下扎。"},
+
+            // な行
+            "な": {"roma": "na", "memory": "像先画十字再往下绕一圈，像伸手去「拿 na」东西的动作。", "shape": "上部十字，下面弯线绕回左边。"},
+            "に": {"roma": "ni", "memory": "几乎就是汉字「二」的手写体，日语里「二」也读 に（ni）。", "shape": "两条平行的短横线。"},
+            "ぬ": {"roma": "nu", "memory": "下方圈圈像打结的面条，联想「扭来扭去」的ぬ。", "shape": "上面一点一笔，下方一圈绕成结。", "highlight": "易混淆提示：ぬ 常被误认为 め。识别锚点：ぬ 有'圈 + 右勾'，像扭结的面条（扭→nu）。"},
+            "ね": {
+                "roma": "ne",
+                "memory": "右边像竖起来的猫耳朵，「猫」日语读 ねこ（neko）。",
+                "shape": "左竖加横，右边一根竖线顶着一个小圈。",
+                "highlightParts": ["右上小圈"],
+                "confusions": [
+                    {"char": "れ", "reason": "れ 的右侧是竖线+小横，而 ね 的右侧是竖线+圈，关键差异：ね 有圈，れ 无圈"},
+                    {"char": "わ", "reason": "わ 右边是弯钩，ね 右边是竖线+圈，关键差异：勾 vs 圈"}
+                ]
+            },
+            "の": {"roma": "no", "memory": "就是一个顺手画出来的圈，像写英文 no 时最后的 o。", "shape": "一笔画出的椭圆圈。"},
+
+            // は行
+            "は": {"roma": "ha", "memory": "左边像旗杆，右边像迎风展开的小旗，插旗时大喊一声「哈 ha」。", "shape": "一竖一横做旗杆，右侧弯笔是旗面。"},
+            "ひ": {"roma": "hi", "memory": "像人弯着腰在偷笑，发「嘻/hi」的气音。", "shape": "一条弯曲线从左上滑向右下。"},
+            "ふ": {"roma": "fu", "memory": "中间两点和弧线像一座小山，联想富士山「ふじさん」。", "shape": "中间一竖两点，下方一条大弧。"},
+            "へ": {"roma": "he", "memory": "就是一个小山坡，往上爬时会「嘿 he」地喘气。", "shape": "一个简单的倒 V 形。"},
+            "ほ": {
+                "roma": "ho",
+                "memory": "左边像一根柱子，右边像带窗的小房子，house 的 ho。",
+                "shape": "竖线旁边加十字和短横，像房子结构。",
+                "highlightParts": ["左竖+中心十字"],
+                "confusions": [
+                    {"char": "ま", "reason": "ま 左侧是波浪，而 ほ 有左竖+中心十字（像窗口），关键差异：十字固定属于 ほ"}
+                ]
+            },
+
+            // ま行
+            "ま": {
+                "roma": "ma",
+                "memory": "整体像写崩的「马」字，发音也是 ma。",
+                "shape": "从上往下弯弯曲曲，有三个小峰。",
+                "highlightParts": ["三个波浪峰"],
+                "confusions": [
+                    {"char": "ほ", "reason": "ほ 有左竖+中心十字（像窗口），而 ま 左侧是波浪不是十字，关键差异：十字固定属于 ほ"}
+                ]
+            },
+            "み": {"roma": "mi", "memory": "三段小弯像三条波浪，联想一把「米 mi」洒成三条线。", "shape": "三笔依次向右下弯。"},
+            "む": {"roma": "mu", "memory": "像一只蜗牛的壳在往上卷，慢慢地「挪 mu」动。", "shape": "上半部分成圈，尾巴向左伸。"},
+            "め": {"roma": "me", "memory": "像一只闭着的眼睛，日语「目」就读 め（me）。", "shape": "一条弯线配一个小钩，形似眼睛轮廓。", "highlight": "易混淆提示：め 常被误认为 ぬ。识别锚点：め 不绕圈，左侧裂开，像'目（me）'。"},
+            "も": {"roma": "mo", "memory": "三条横线叠加，像三根「毛 mo」竖在一起。", "shape": "上中下三横右侧连着竖弯。"},
+
+            // や行
+            "や": {"roma": "ya", "memory": "像岔开的树枝，中文「丫」和 ya 同音。", "shape": "上下一竖，中间岔出一撇。"},
+            "ゆ": {"roma": "yu", "memory": "外面像一个方框浴缸，里面一笔像水面，联想「浴 yu」。", "shape": "矩形轮廓里包着一小勾。"},
+            "よ": {"roma": "yo", "memory": "三段结构像上下牙齿加下巴，张嘴喊「哟 yo」。", "shape": "上面两短横，下面一弯钩托住。"},
+
+            // ら行
+            "ら": {
+                "roma": "ra",
+                "memory": "像一根被拉起来的绳尾，联想「拉 ra」。",
+                "shape": "从上往下弯折像甩起来的线。",
+                "highlightParts": ["单弧线"],
+                "confusions": [
+                    {"char": "ろ", "reason": "ろ 是未封口的口形（三边框），而 ら 是单弧线，关键差异：框 vs 弧"},
+                    {"char": "る", "reason": "る 有小圈+尾巴，而 ら 是单弧线无圈，关键差异：有圈 vs 无圈"},
+                    {"char": "り", "reason": "り 是双竖线，而 ら 是单弧线，关键差异：直 vs 弯"}
+                ]
+            },
+            "り": {
+                "roma": "ri",
+                "memory": "两根小勾并排，像两根筷子立着，读 ri。",
+                "shape": "左短右长的两条竖弯线。",
+                "highlightParts": ["两条竖线"],
+                "confusions": [
+                    {"char": "ら", "reason": "ら 是单弧线，而 り 是双竖线，关键差异：弯 vs 直"},
+                    {"char": "ろ", "reason": "ろ 是未封口的口形（三边框），而 り 是双竖线，关键差异：框 vs 线"},
+                    {"char": "る", "reason": "る 有小圈+尾巴，而 り 是双竖线无圈，关键差异：有圈 vs 无圈"}
+                ]
+            },
+            "る": {
+                "roma": "ru",
+                "memory": "尾巴卷成一圈，像路上打的小漩涡，联想「绕来绕去 ru」。",
+                "shape": "上半圈，下方一小尾巴向右甩。",
+                "highlightParts": ["小圈+右甩尾巴"],
+                "confusions": [
+                    {"char": "ら", "reason": "ら 是单弧线无圈，而 る 有小圈+尾巴，关键差异：无圈 vs 有圈"},
+                    {"char": "ろ", "reason": "ろ 是未封口的口形（三边框），而 る 有小圈+尾巴，关键差异：方框 vs 圆圈"},
+                    {"char": "り", "reason": "り 是双竖线无圈，而 る 有小圈+尾巴，关键差异：无圈 vs 有圈"}
+                ]
+            },
+            "れ": {
+                "roma": "re",
+                "memory": "像一条主线右侧再伸出一笔，像裂开的一道口，re = 裂。",
+                "shape": "一条竖弯线，右中部伸出一小横。",
+                "highlightParts": ["右侧小横"],
+                "confusions": [
+                    {"char": "ね", "reason": "ね 的右侧是竖线+圈，而 れ 的右侧是竖线+小横，关键差异：ね 有圈，れ 无圈"},
+                    {"char": "わ", "reason": "わ 右边是弯钩，れ 右边是竖线+小横，关键差异：勾 vs 横"}
+                ]
+            },
+            "ろ": {
+                "roma": "ro",
+                "memory": "像一个没封口的「口」，读 ro，联想「口」漏了一块。",
+                "shape": "三边框成 ㄇ 形，底部敞开。",
+                "highlightParts": ["三边未封口框"],
+                "confusions": [
+                    {"char": "ら", "reason": "ら 是单弧线，而 ろ 是未封口的口形（三边框），关键差异：弧 vs 框"},
+                    {"char": "る", "reason": "る 有小圈+尾巴，而 ろ 是未封口的口形（三边框），关键差异：圆圈 vs 方框"},
+                    {"char": "り", "reason": "り 是双竖线，而 ろ 是未封口的口形（三边框），关键差异：线 vs 框"}
+                ]
+            },
+
+            // わ行
+            "わ": {
+                "roma": "wa",
+                "memory": "下半部分像弯钩，像在画一个问号的后半段，联想「哇 wa」的语气。",
+                "shape": "左竖右弯钩，整体偏瘦。",
+                "highlightParts": ["右边弯钩"],
+                "confusions": [
+                    {"char": "れ", "reason": "れ 右边是竖线+小横，而 わ 右边是弯钩，关键差异：横 vs 勾"},
+                    {"char": "ね", "reason": "ね 右边是竖线+圈，而 わ 右边是弯钩，关键差异：圈 vs 勾"}
+                ]
+            },
+            "を": {"roma": "wo", "memory": "像加了尾巴的「の」，是特殊用法的「o/wo」，记成「带尾巴的 o」。", "shape": "一笔画出，先弯再圈，右边多出一个钩。"},
+            "ん": {"roma": "n", "memory": "像随手写的 n，发音也是鼻音 n。", "shape": "从左到右拉出的弯线，尾部略微上挑。"}
+        };
+
+        // 五十音顺序
+        const hiraganaOrder = [
+            "あ", "い", "う", "え", "お",
+            "か", "き", "く", "け", "こ",
+            "さ", "し", "す", "せ", "そ",
+            "た", "ち", "つ", "て", "と",
+            "な", "に", "ぬ", "ね", "の",
+            "は", "ひ", "ふ", "へ", "ほ",
+            "ま", "み", "む", "め", "も",
+            "や", "ゆ", "よ",
+            "ら", "り", "る", "れ", "ろ",
+            "わ", "を", "ん"
+        ];
+
+        // LocalStorage 管理
+        const STORAGE_KEY = {
+            ERRORS: 'hiragana_errors',
+            STATS: 'hiragana_stats'
+        };
+
+        // 获取错题记录
+        function getErrors() {
+            const data = localStorage.getItem(STORAGE_KEY.ERRORS);
+            return data ? JSON.parse(data) : {};
+        }
+
+        // 保存错题记录
+        function saveError(char) {
+            const errors = getErrors();
+            if (!errors[char]) {
+                errors[char] = { count: 0, lastTime: null };
+            }
+            errors[char].count++;
+            errors[char].lastTime = Date.now();
+            localStorage.setItem(STORAGE_KEY.ERRORS, JSON.stringify(errors));
+            updateErrorBadge();
+            updateGridErrorMarks();
+        }
+
+        // 删除单个错题
+        function removeError(char) {
+            const errors = getErrors();
+            delete errors[char];
+            localStorage.setItem(STORAGE_KEY.ERRORS, JSON.stringify(errors));
+            updateErrorBadge();
+            updateGridErrorMarks();
+            showErrorBook(); // 刷新错题本显示
+        }
+
+        // 清空所有错题
+        function clearAllErrors() {
+            if (confirm('确定要清空所有错题记录吗？')) {
+                localStorage.setItem(STORAGE_KEY.ERRORS, JSON.stringify({}));
+                updateErrorBadge();
+                updateGridErrorMarks();
+                showErrorBook();
+            }
+        }
+
+        // 获取统计数据
+        function getStats() {
+            const data = localStorage.getItem(STORAGE_KEY.STATS);
+            return data ? JSON.parse(data) : { total: 0, correct: 0, wrong: 0 };
+        }
+
+        // 更新统计数据
+        function updateStats(isCorrect) {
+            const stats = getStats();
+            stats.total++;
+            if (isCorrect) {
+                stats.correct++;
+            } else {
+                stats.wrong++;
+            }
+            localStorage.setItem(STORAGE_KEY.STATS, JSON.stringify(stats));
+        }
+
+        // 重置统计
+        function resetStats() {
+            if (confirm('确定要重置所有统计数据吗？')) {
+                localStorage.setItem(STORAGE_KEY.STATS, JSON.stringify({ total: 0, correct: 0, wrong: 0 }));
+                closeStatsModal();
+            }
+        }
+
+        // 更新错题徽章
+        function updateErrorBadge() {
+            const errors = getErrors();
+            const count = Object.keys(errors).length;
+            const badge = document.getElementById('errorBadge');
+            if (count > 0) {
+                badge.textContent = count;
+                badge.style.display = 'inline-block';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        // 更新网格错题标记
+        function updateGridErrorMarks() {
+            const errors = getErrors();
+            document.querySelectorAll('.hiragana-card').forEach(card => {
+                const char = card.querySelector('.hiragana-char').textContent;
+                if (errors[char]) {
+                    card.classList.add('error-mark');
+                } else {
+                    card.classList.remove('error-mark');
+                }
+            });
+        }
+
+        // 渲染假名网格
+        function renderHiraganaGrid() {
+            const grid = document.getElementById('hiraganaGrid');
+            hiraganaOrder.forEach(char => {
+                const data = hiraganaData[char];
+                const card = document.createElement('div');
+                card.className = 'hiragana-card';
+                card.innerHTML = `
+                    <div class="hiragana-char">${char}</div>
+                    <div class="hiragana-roma">${data.roma}</div>
+                `;
+                card.onclick = () => openModal(char);
+                grid.appendChild(card);
+            });
+            updateErrorBadge();
+            updateGridErrorMarks();
+        }
+
+        // 打开详情 Modal
+        function openModal(char) {
+            currentIndex = hiraganaOrder.indexOf(char);
+            const data = hiraganaData[char];
+            document.getElementById('modalChar').textContent = char;
+            document.getElementById('modalRoma').textContent = data.roma;
+            document.getElementById('modalMemory').textContent = data.memory;
+            document.getElementById('modalShape').textContent = data.shape;
+
+            // 处理 highlight 字段
+            const highlightSection = document.getElementById('modalHighlightSection');
+            if (data.highlight) {
+                document.getElementById('modalHighlight').textContent = data.highlight;
+                highlightSection.style.display = 'block';
+                highlightSection.classList.add('highlight-section');
+            } else {
+                highlightSection.style.display = 'none';
+                highlightSection.classList.remove('highlight-section');
+            }
+
+            // 处理 highlightParts 字段
+            const highlightPartsSection = document.getElementById('modalHighlightPartsSection');
+            const highlightPartsContainer = document.getElementById('modalHighlightParts');
+            if (data.highlightParts && data.highlightParts.length > 0) {
+                highlightPartsContainer.innerHTML = data.highlightParts.map(part =>
+                    `<span class="highlight-parts-item">${part}</span>`
+                ).join('');
+                highlightPartsSection.style.display = 'block';
+            } else {
+                highlightPartsSection.style.display = 'none';
+            }
+
+            // 处理 confusions 字段
+            const confusionsSection = document.getElementById('modalConfusionsSection');
+            const confusionsContainer = document.getElementById('modalConfusions');
+            if (data.confusions && data.confusions.length > 0) {
+                confusionsContainer.innerHTML = data.confusions.map(confusion => `
+                    <div class="confusion-item">
+                        <span class="confusion-char-link" onclick="openModal('${confusion.char}'); event.stopPropagation();">${confusion.char}</span>
+                        <span class="confusion-reason">${confusion.reason}</span>
+                    </div>
+                `).join('');
+                confusionsSection.style.display = 'block';
+            } else {
+                confusionsSection.style.display = 'none';
+            }
+
+            document.getElementById('modalOverlay').classList.add('active');
+        }
+
+        // 关闭详情 Modal
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('active');
+        }
+
+        // 点击背景关闭
+        document.getElementById('modalOverlay').addEventListener('click', closeModal);
+
+        // 混淆训练模式切换
+        function toggleConfusionTraining() {
+            confusionTrainingMode = !confusionTrainingMode;
+            const btn = document.getElementById('confusionTrainingBtn');
+            const text = document.getElementById('confusionTrainingText');
+
+            if (confusionTrainingMode) {
+                btn.classList.add('active');
+                text.textContent = '混淆训练：开启';
+            } else {
+                btn.classList.remove('active');
+                text.textContent = '混淆训练：关闭';
+            }
+        }
+
+        // 随机检查功能
+        let currentQuestion = null;
+        let quizSessionStats = { correct: 0, wrong: 0 };
+
+        function startQuiz() {
+            quizSessionStats = { correct: 0, wrong: 0 };
+            updateQuizStats();
+            updateQuizModeLabel();
+            nextQuestion();
+            document.getElementById('quizModal').classList.add('active');
+        }
+
+        function closeQuizModal() {
+            document.getElementById('quizModal').classList.remove('active');
+        }
+
+        function updateQuizModeLabel() {
+            const label = document.getElementById('quizModeLabel');
+            if (confusionTrainingMode) {
+                label.textContent = '混淆训练模式 - 请选择正确的假名';
+            } else {
+                label.textContent = '请选择正确的假名';
+            }
+        }
+
+        function nextQuestion() {
+            // 隐藏结果
+            const resultDiv = document.getElementById('quizResult');
+            resultDiv.classList.add('hidden');
+            resultDiv.classList.remove('correct', 'wrong');
+
+            // 根据模式选择假名范围
+            const sourceList = confusionTrainingMode ? confusionCharList : hiraganaOrder;
+
+            // 随机选择一个假名
+            const correctChar = sourceList[Math.floor(Math.random() * sourceList.length)];
+            currentQuestion = correctChar;
+
+            // 显示罗马音
+            document.getElementById('quizTarget').textContent = hiraganaData[correctChar].roma.toUpperCase();
+
+            // 生成选项（1个正确 + 3个错误）
+            const options = [correctChar];
+            while (options.length < 4) {
+                const randomChar = sourceList[Math.floor(Math.random() * sourceList.length)];
+                if (!options.includes(randomChar)) {
+                    options.push(randomChar);
+                }
+            }
+
+            // 打乱选项顺序
+            options.sort(() => Math.random() - 0.5);
+
+            // 渲染选项
+            const optionsContainer = document.getElementById('quizOptions');
+            optionsContainer.innerHTML = '';
+            options.forEach(char => {
+                const option = document.createElement('div');
+                option.className = 'quiz-option';
+                option.dataset.char = char; // 存储字符数据
+                option.innerHTML = `
+                    <div class="quiz-option-char">${char}</div>
+                    <div class="quiz-option-roma">${hiraganaData[char].roma}</div>
+                `;
+                option.onclick = () => checkAnswer(char, option);
+                optionsContainer.appendChild(option);
+            });
+        }
+
+        function checkAnswer(selectedChar, optionElement) {
+            const isCorrect = selectedChar === currentQuestion;
+
+            // 禁用所有选项
+            document.querySelectorAll('.quiz-option').forEach(opt => {
+                opt.classList.add('disabled');
+            });
+
+            // 标记选中的选项
+            if (isCorrect) {
+                optionElement.classList.add('correct');
+                quizSessionStats.correct++;
+            } else {
+                optionElement.classList.add('wrong');
+                quizSessionStats.wrong++;
+                saveError(currentQuestion);
+
+                // 标记正确答案，并显示所有选项的罗马音
+                document.querySelectorAll('.quiz-option').forEach(opt => {
+                    opt.classList.add('show-roma'); // 显示罗马音
+                    if (opt.dataset.char === currentQuestion) {
+                        opt.classList.add('correct');
+                    }
+                });
+            }
+
+            // 更新统计
+            updateStats(isCorrect);
+            updateQuizStats();
+
+            // 显示结果
+            const resultDiv = document.getElementById('quizResult');
+            resultDiv.classList.remove('hidden');
+            resultDiv.className = `quiz-result ${isCorrect ? 'correct' : 'wrong'}`;
+            resultDiv.textContent = isCorrect ?
+                '✓ 回答正确！' :
+                `✗ 回答错误！正确答案是：${currentQuestion}`;
+
+            // 如果回答正确，800ms后自动进入下一题
+            if (isCorrect) {
+                setTimeout(() => {
+                    // 检查弹窗是否还在显示（用户可能已经关闭）
+                    if (document.getElementById('quizModal').classList.contains('active')) {
+                        nextQuestion();
+                    }
+                }, 800);
+            }
+        }
+
+        function updateQuizStats() {
+            document.getElementById('quizCorrect').textContent = quizSessionStats.correct;
+            document.getElementById('quizWrong').textContent = quizSessionStats.wrong;
+            const total = quizSessionStats.correct + quizSessionStats.wrong;
+            const accuracy = total > 0 ? Math.round((quizSessionStats.correct / total) * 100) : 0;
+            document.getElementById('quizAccuracy').textContent = accuracy + '%';
+        }
+
+        // 错题本
+        function showErrorBook() {
+            const errors = getErrors();
+            const errorContent = document.getElementById('errorContent');
+
+            if (Object.keys(errors).length === 0) {
+                errorContent.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">✓</div>
+                        <div class="empty-text">还没有错题记录</div>
+                    </div>
+                `;
+            } else {
+                const errorList = Object.entries(errors)
+                    .sort((a, b) => b[1].count - a[1].count)
+                    .map(([char, data]) => {
+                        return `
+                            <div class="error-item">
+                                <div class="error-item-left">
+                                    <div class="error-char">${char}</div>
+                                    <div class="error-info">
+                                        <div class="error-roma">${hiraganaData[char].roma}</div>
+                                        <div class="error-count">错误 ${data.count} 次</div>
+                                    </div>
+                                </div>
+                                <div class="error-actions">
+                                    <button class="error-btn review" onclick="reviewError('${char}')">复习</button>
+                                    <button class="error-btn remove" onclick="removeError('${char}')">移除</button>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+
+                errorContent.innerHTML = `<div class="error-list">${errorList}</div>`;
+            }
+
+            document.getElementById('errorModal').classList.add('active');
+        }
+
+        function closeErrorModal() {
+            document.getElementById('errorModal').classList.remove('active');
+        }
+
+        function reviewError(char) {
+            closeErrorModal();
+            openModal(char);
+        }
+
+        // 学习统计
+        function showStats() {
+            const stats = getStats();
+            document.getElementById('statTotal').textContent = stats.total;
+            document.getElementById('statCorrect').textContent = stats.correct;
+            document.getElementById('statWrong').textContent = stats.wrong;
+
+            const accuracy = stats.total > 0 ? Math.round((stats.correct / stats.total) * 100) : 0;
+            document.getElementById('statAccuracy').textContent = accuracy + '%';
+
+            document.getElementById('statsModal').classList.add('active');
+        }
+
+        function closeStatsModal() {
+            document.getElementById('statsModal').classList.remove('active');
+        }
+
+        // 键盘快捷键
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeModal();
+                closeQuizModal();
+                closeErrorModal();
+                closeStatsModal();
+            }
+        });
+
+        // 点击背景关闭
+        document.getElementById('quizModal').addEventListener('click', closeQuizModal);
+        document.getElementById('errorModal').addEventListener('click', closeErrorModal);
+        document.getElementById('statsModal').addEventListener('click', closeStatsModal);
+
+        // 初始化
+        renderHiraganaGrid();
+
+        // 注册 Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./service-worker.js')
+                    .then(registration => {
+                        console.log('Service Worker 注册成功:', registration.scope);
+                    })
+                    .catch(error => {
+                        console.log('Service Worker 注册失败:', error);
+                    });
+            });
+        }
+    </script>
+</body>
+</html>

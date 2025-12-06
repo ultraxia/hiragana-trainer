@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>生成 PWA 图标</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+            padding: 40px;
+            background: #f5f5f7;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        h1 { color: #1d1d1f; }
+        button {
+            background: #007AFF;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        button:hover { background: #0051D5; }
+        canvas { display: none; }
+        .preview {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        .preview-item {
+            text-align: center;
+        }
+        .preview-item img {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>生成日语五十音 PWA 图标</h1>
+        <p>点击下面的按钮生成并下载所有需要的图标尺寸。</p>
+
+        <button onclick="generateAllIcons()">生成所有图标</button>
+
+        <div id="preview" class="preview"></div>
+        <canvas id="canvas"></canvas>
+    </div>
+
+    <script>
+        const sizes = [
+            16, 32, 72, 96, 120, 128, 144, 152, 180, 192, 384, 512
+        ];
+
+        function drawIcon(ctx, size) {
+            // 背景渐变
+            const gradient = ctx.createLinearGradient(0, 0, size, size);
+            gradient.addColorStop(0, '#007AFF');
+            gradient.addColorStop(1, '#0051D5');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, size, size);
+
+            // 绘制日语假名 "あ"
+            ctx.fillStyle = 'white';
+            ctx.font = `bold ${size * 0.6}px "Hiragino Sans", "Yu Gothic", sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('あ', size / 2, size / 2);
+        }
+
+        function generateIcon(size) {
+            const canvas = document.getElementById('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+
+            drawIcon(ctx, size);
+
+            return canvas.toDataURL('image/png');
+        }
+
+        function downloadIcon(dataUrl, filename) {
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = dataUrl;
+            link.click();
+        }
+
+        function generateAllIcons() {
+            const preview = document.getElementById('preview');
+            preview.innerHTML = '<p>正在生成图标...</p>';
+
+            setTimeout(() => {
+                preview.innerHTML = '';
+
+                sizes.forEach((size, index) => {
+                    setTimeout(() => {
+                        const dataUrl = generateIcon(size);
+                        const filename = `icon-${size}x${size}.png`;
+
+                        // 添加预览
+                        const previewItem = document.createElement('div');
+                        previewItem.className = 'preview-item';
+                        previewItem.innerHTML = `
+                            <img src="${dataUrl}" width="${Math.min(size, 100)}" height="${Math.min(size, 100)}">
+                            <div>${size}x${size}</div>
+                            <button onclick="downloadSingleIcon(${size})">下载</button>
+                        `;
+                        preview.appendChild(previewItem);
+
+                        // 自动下载
+                        downloadIcon(dataUrl, filename);
+                    }, index * 200);
+                });
+
+                preview.innerHTML += '<p style="width:100%; margin-top:20px; color:#34C759;">✓ 所有图标已生成！请检查下载文件夹。</p>';
+            }, 100);
+        }
+
+        function downloadSingleIcon(size) {
+            const dataUrl = generateIcon(size);
+            downloadIcon(dataUrl, `icon-${size}x${size}.png`);
+        }
+    </script>
+</body>
+</html>
