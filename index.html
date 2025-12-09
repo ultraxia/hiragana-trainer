@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>日语五十音学习（平假名）· 优化助记版</title>
+    <title>日语五十音学习 · 优化助记版</title>
 
     <!-- PWA Manifest -->
     <link rel="manifest" href="manifest.json">
 
     <!-- Theme Color -->
     <meta name="theme-color" content="#007AFF">
-    <meta name="description" content="日语五十音学习工具 - 平假名优化助记版">
+    <meta name="description" content="日语五十音学习工具">
 
     <!-- iOS 特定配置 -->
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -129,6 +129,53 @@
             border-radius: 10px;
             font-size: 13px;
             font-weight: 700;
+        }
+
+        /* 模式切换标签 */
+        .mode-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 0;
+            margin-bottom: 32px;
+            background: rgba(120, 120, 128, 0.12);
+            border-radius: 12px;
+            padding: 4px;
+            max-width: 320px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .mode-tab {
+            flex: 1;
+            background: transparent;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 24px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #86868b;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .mode-tab:hover {
+            color: #1d1d1f;
+        }
+
+        .mode-tab.active {
+            background: white;
+            color: #1d1d1f;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .mode-tab.hiragana.active {
+            background: linear-gradient(135deg, #007AFF, #5856D6);
+            color: white;
+        }
+
+        .mode-tab.katakana.active {
+            background: linear-gradient(135deg, #FF6B6B, #FF8E53);
+            color: white;
         }
 
         .hiragana-grid {
@@ -764,7 +811,13 @@
 <body>
     <div class="container">
         <h1>日语五十音学习</h1>
-        <div class="subtitle">平假名 · Hiragana · 优化助记版</div>
+        <div class="subtitle" id="subtitle">平假名 · Hiragana · 优化助记版</div>
+
+        <!-- 模式切换 -->
+        <div class="mode-tabs">
+            <button class="mode-tab hiragana active" onclick="switchMode('hiragana')">平假名</button>
+            <button class="mode-tab katakana" onclick="switchMode('katakana')">片假名</button>
+        </div>
 
         <!-- 功能按钮 -->
         <div class="action-buttons">
@@ -851,7 +904,7 @@
     <div class="modal-overlay" id="errorModal">
         <div class="modal-content" onclick="event.stopPropagation()">
             <button class="close-btn" onclick="closeErrorModal()">&times;</button>
-            <h2 style="text-align: center; margin-bottom: 24px; font-size: 28px;">错题本</h2>
+            <h2 id="errorModalTitle" style="text-align: center; margin-bottom: 24px; font-size: 28px;">错题本</h2>
             <div id="errorContent"></div>
             <div style="margin-top: 24px; text-align: center;">
                 <button class="quiz-btn" onclick="closeErrorModal()">关闭</button>
@@ -864,7 +917,7 @@
     <div class="modal-overlay" id="statsModal">
         <div class="modal-content" onclick="event.stopPropagation()">
             <button class="close-btn" onclick="closeStatsModal()">&times;</button>
-            <h2 style="text-align: center; margin-bottom: 24px; font-size: 28px;">学习统计</h2>
+            <h2 id="statsModalTitle" style="text-align: center; margin-bottom: 24px; font-size: 28px;">学习统计</h2>
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-value" id="statTotal">0</div>
@@ -891,12 +944,14 @@
     </div>
 
     <script>
-        // 平假名数据
+        // 当前模式和状态
+        let currentMode = 'hiragana'; // 'hiragana' 或 'katakana'
         let currentIndex = null;
         let confusionTrainingMode = false;
 
         // 易混淆假名列表（用于混淆训练模式）
-        const confusionCharList = ["ね", "れ", "わ", "さ", "ち", "ま", "ほ", "ら", "ろ", "る", "り"];
+        const hiraganaConfusionList = ["ね", "れ", "わ", "さ", "ち", "ま", "ほ", "ら", "ろ", "る", "り"];
+        const katakanaConfusionList = ["ア", "ヤ", "シ", "ツ", "ソ", "ン", "ノ", "ク", "ワ", "ウ", "フ", "ラ", "リ", "ル", "レ", "ロ"];
 
         const hiraganaData = {
             // あ行
@@ -1065,7 +1120,7 @@
             "ん": {"roma": "n", "memory": "像随手写的 n，发音也是鼻音 n。", "shape": "从左到右拉出的弯线，尾部略微上挑。"}
         };
 
-        // 五十音顺序
+        // 平假名五十音顺序
         const hiraganaOrder = [
             "あ", "い", "う", "え", "お",
             "か", "き", "く", "け", "こ",
@@ -1079,15 +1134,160 @@
             "わ", "を", "ん"
         ];
 
-        // LocalStorage 管理
-        const STORAGE_KEY = {
-            ERRORS: 'hiragana_errors',
-            STATS: 'hiragana_stats'
+        // 片假名数据
+        const katakanaData = {
+            // ア行
+            "ア": {"roma": "a", "memory": "像一个人抬头大喊「啊」的姿势，与平假名的あ对应。", "shape": "左竖 + 右上斜线，像张开手臂。"},
+            "イ": {"roma": "i", "memory": "两条细线并排，就是直挺挺的 i。", "shape": "两笔竖线，简单直接。"},
+            "ウ": {"roma": "u", "memory": "顶上像乌鸦的嘴，u→乌，嘴巴向前伸。", "shape": "一个竖钩配弯折的短横。"},
+            "エ": {"roma": "e", "memory": "三层结构像三道横线的 E。", "shape": "上中下三横明确分层。"},
+            "オ": {"roma": "o", "memory": "上面像「f」的笔画，读 o，像在点头的形状。", "shape": "左竖 + 右侧斜勾。"},
+
+            // カ行
+            "カ": {"roma": "ka", "memory": "很像汉字「力」的简写，ka→卡住。", "shape": "上斜线 + 下竖线。"},
+            "キ": {"roma": "ki", "memory": "三横一竖是平假名き的直线版本，像机械键盘的「key」。", "shape": "三条短横 + 一竖。"},
+            "ク": {"roma": "ku", "memory": "像一个张嘴的角，说「哭 ku」嘴角下撇。", "shape": "单勾向右。"},
+            "ケ": {"roma": "ke", "memory": "像一扇门，ke→开（kai），门的形状。", "shape": "竖 + 两横。"},
+            "コ": {"roma": "ko", "memory": "两条横线整齐排列，ko→口字缺一边。", "shape": "平行两横。"},
+
+            // サ行
+            "サ": {"roma": "sa", "memory": "左侧竖，右上两笔像「撒」出去的动作。", "shape": "一竖 + 两短横。"},
+            "シ": {
+                "roma": "shi",
+                "memory": "三笔从右往左像眼泪滑下来，shi→吸吸哭的声音。",
+                "shape": "三点从上到下倾斜。",
+                "highlightParts": ["三点竖向排列"],
+                "confusions": [
+                    {"char": "ツ", "reason": "ツ 的三点是横向排列，而 シ 的三点是竖向排列，关键差异：横 vs 竖"}
+                ]
+            },
+            "ス": {"roma": "su", "memory": "像钓鱼钩钓上来（su→捞）的动作。", "shape": "一横 + 弯钩。"},
+            "セ": {"roma": "se", "memory": "像平假名せ的直角版。", "shape": "一竖 + 两横。"},
+            "ソ": {
+                "roma": "so",
+                "memory": "两笔像剪刀打开（so→「嗦」一下剪掉）。",
+                "shape": "两斜线呈锐角。",
+                "highlightParts": ["两点向右下倾斜"],
+                "confusions": [
+                    {"char": "ン", "reason": "ン 的两点向左下倾斜，而 ソ 的两点向右下倾斜，关键差异：方向相反"}
+                ]
+            },
+
+            // タ行
+            "タ": {"roma": "ta", "memory": "像 T 字倒置，读 ta。", "shape": "顶横 + 竖 + 下短横。"},
+            "チ": {"roma": "chi", "memory": "上面水平线像数字 1，下面弯钩像 ち 的骨架。", "shape": "横 + 勾。"},
+            "ツ": {
+                "roma": "tsu",
+                "memory": "像三滴水往下落，是平假名つ的竖版。",
+                "shape": "三小点竖排。",
+                "highlightParts": ["三点横向排列"],
+                "confusions": [
+                    {"char": "シ", "reason": "シ 的三点是竖向排列，而 ツ 的三点是横向排列，关键差异：竖 vs 横"}
+                ]
+            },
+            "テ": {"roma": "te", "memory": "像一个伸出去的十字手臂（手=te）。", "shape": "十字结构。"},
+            "ト": {"roma": "to", "memory": "刀的一笔，to→戳一下很痛（と）。", "shape": "一笔斜钩。"},
+
+            // ナ行
+            "ナ": {"roma": "na", "memory": "像一个人跪下来拿东西的姿势。", "shape": "竖 + 左弯笔。"},
+            "ニ": {"roma": "ni", "memory": "两条平行横线就是二（に）。", "shape": "两横。"},
+            "ヌ": {"roma": "nu", "memory": "形状像一个弯折的叉子，nu→「怒」时甩出的形状。", "shape": "右斜 + 下方 U 形。"},
+            "ネ": {"roma": "ne", "memory": "像汉字「祢」的拆开版，ne 的起源形。", "shape": "左竖 + 右上勾。"},
+            "ノ": {"roma": "no", "memory": "简单的一笔斜线，就是 no 的否定划掉。", "shape": "单斜线。"},
+
+            // ハ行
+            "ハ": {"roma": "ha", "memory": "像两片叶子分开（は→叶）。", "shape": "两笔分叉。"},
+            "ヒ": {"roma": "hi", "memory": "像一条被削尖的刀刃，发 hi 的气音。", "shape": "右下压的线。"},
+            "フ": {"roma": "fu", "memory": "两撇像火苗，fu→风吹火苗摆动。", "shape": "两短撇。"},
+            "ヘ": {"roma": "he", "memory": "像山坡小于号，he→哈气往上吹。", "shape": "单个 V。"},
+            "ホ": {"roma": "ho", "memory": "十字架 + 竖，像房子的结构。", "shape": "三笔交叉。"},
+
+            // マ行
+            "マ": {"roma": "ma", "memory": "像汉字「マ」音的原始形，ma→妈手写片假名。", "shape": "三横 + 左端装饰。"},
+            "ミ": {"roma": "mi", "memory": "三条平行横线像三条浪，mi→波的声音。", "shape": "三横。"},
+            "ム": {"roma": "mu", "memory": "像嘴巴闭起来，mu→「姆」的口型。", "shape": "右上到左下的大角度折笔。"},
+            "メ": {"roma": "me", "memory": "像一个斜叉，是平假名め的锋利化版本。", "shape": "两斜交叉。"},
+            "モ": {"roma": "mo", "memory": "上下分层像毛（も）的结构。", "shape": "三横 + 一竖。"},
+
+            // ヤ行
+            "ヤ": {"roma": "ya", "memory": "像一个分叉的树枝，ya→丫。", "shape": "一竖 + 一弯。"},
+            "ユ": {"roma": "yu", "memory": "像一个浴缸的方框（ゆ→浴）。", "shape": "方框加横。"},
+            "ヨ": {"roma": "yo", "memory": "三横像 yo yo 的节奏。", "shape": "三横。"},
+
+            // ラ行
+            "ラ": {
+                "roma": "ra",
+                "memory": "像一个甩出去的 L 形，ra→拉。",
+                "shape": "向右甩的笔。",
+                "highlightParts": ["上横下弯"],
+                "confusions": [
+                    {"char": "ウ", "reason": "ウ 顶部有短横和内勾，而 ラ 是简单的上横下弯，关键差异：结构复杂度不同"}
+                ]
+            },
+            "リ": {"roma": "ri", "memory": "两笔竖线像两根筷子。", "shape": "两竖。"},
+            "ル": {"roma": "ru", "memory": "尾巴卷起来像鱼钩，ru→绕。", "shape": "勾尾。"},
+            "レ": {"roma": "re", "memory": "斜下的一笔像撇下去，re→裂。", "shape": "单斜钩。"},
+            "ロ": {"roma": "ro", "memory": "正方形三边框，像口字少一边。", "shape": "ㄇ形外框。"},
+
+            // ワ行
+            "ワ": {
+                "roma": "wa",
+                "memory": "左竖右勾像哇的一声。",
+                "shape": "竖线 + 大勾。",
+                "highlightParts": ["竖线 + 弯勾"],
+                "confusions": [
+                    {"char": "ウ", "reason": "ウ 顶部有短横，而 ワ 只有竖线+弯勾，关键差异：顶部结构不同"},
+                    {"char": "ク", "reason": "ク 是单一的弯勾，而 ワ 有明显的左竖，关键差异：左侧有无竖线"}
+                ]
+            },
+            "ヲ": {"roma": "wo", "memory": "像加了尾巴的ロ，特殊 o。", "shape": "圆右侧加钩。"},
+            "ン": {
+                "roma": "n",
+                "memory": "像手写 n 的斜角。",
+                "shape": "右下跌落的笔。",
+                "highlightParts": ["两点向左下倾斜"],
+                "confusions": [
+                    {"char": "ソ", "reason": "ソ 的两点向右下倾斜，而 ン 的两点向左下倾斜，关键差异：方向相反"}
+                ]
+            }
         };
+
+        // 片假名五十音顺序
+        const katakanaOrder = [
+            "ア", "イ", "ウ", "エ", "オ",
+            "カ", "キ", "ク", "ケ", "コ",
+            "サ", "シ", "ス", "セ", "ソ",
+            "タ", "チ", "ツ", "テ", "ト",
+            "ナ", "ニ", "ヌ", "ネ", "ノ",
+            "ハ", "ヒ", "フ", "ヘ", "ホ",
+            "マ", "ミ", "ム", "メ", "モ",
+            "ヤ", "ユ", "ヨ",
+            "ラ", "リ", "ル", "レ", "ロ",
+            "ワ", "ヲ", "ン"
+        ];
+
+        // 获取当前模式的数据和顺序
+        function getCurrentData() {
+            return currentMode === 'hiragana' ? hiraganaData : katakanaData;
+        }
+
+        function getCurrentOrder() {
+            return currentMode === 'hiragana' ? hiraganaOrder : katakanaOrder;
+        }
+
+        function getConfusionList() {
+            return currentMode === 'hiragana' ? hiraganaConfusionList : katakanaConfusionList;
+        }
+
+        // LocalStorage 管理
+        function getStorageKey(type) {
+            const prefix = currentMode === 'hiragana' ? 'hiragana' : 'katakana';
+            return `${prefix}_${type}`;
+        }
 
         // 获取错题记录
         function getErrors() {
-            const data = localStorage.getItem(STORAGE_KEY.ERRORS);
+            const data = localStorage.getItem(getStorageKey('errors'));
             return data ? JSON.parse(data) : {};
         }
 
@@ -1099,7 +1299,7 @@
             }
             errors[char].count++;
             errors[char].lastTime = Date.now();
-            localStorage.setItem(STORAGE_KEY.ERRORS, JSON.stringify(errors));
+            localStorage.setItem(getStorageKey('errors'), JSON.stringify(errors));
             updateErrorBadge();
             updateGridErrorMarks();
         }
@@ -1108,7 +1308,7 @@
         function removeError(char) {
             const errors = getErrors();
             delete errors[char];
-            localStorage.setItem(STORAGE_KEY.ERRORS, JSON.stringify(errors));
+            localStorage.setItem(getStorageKey('errors'), JSON.stringify(errors));
             updateErrorBadge();
             updateGridErrorMarks();
             showErrorBook(); // 刷新错题本显示
@@ -1116,8 +1316,9 @@
 
         // 清空所有错题
         function clearAllErrors() {
-            if (confirm('确定要清空所有错题记录吗？')) {
-                localStorage.setItem(STORAGE_KEY.ERRORS, JSON.stringify({}));
+            const modeName = currentMode === 'hiragana' ? '平假名' : '片假名';
+            if (confirm(`确定要清空${modeName}的所有错题记录吗？`)) {
+                localStorage.setItem(getStorageKey('errors'), JSON.stringify({}));
                 updateErrorBadge();
                 updateGridErrorMarks();
                 showErrorBook();
@@ -1126,7 +1327,7 @@
 
         // 获取统计数据
         function getStats() {
-            const data = localStorage.getItem(STORAGE_KEY.STATS);
+            const data = localStorage.getItem(getStorageKey('stats'));
             return data ? JSON.parse(data) : { total: 0, correct: 0, wrong: 0 };
         }
 
@@ -1139,13 +1340,14 @@
             } else {
                 stats.wrong++;
             }
-            localStorage.setItem(STORAGE_KEY.STATS, JSON.stringify(stats));
+            localStorage.setItem(getStorageKey('stats'), JSON.stringify(stats));
         }
 
         // 重置统计
         function resetStats() {
-            if (confirm('确定要重置所有统计数据吗？')) {
-                localStorage.setItem(STORAGE_KEY.STATS, JSON.stringify({ total: 0, correct: 0, wrong: 0 }));
+            const modeName = currentMode === 'hiragana' ? '平假名' : '片假名';
+            if (confirm(`确定要重置${modeName}的所有统计数据吗？`)) {
+                localStorage.setItem(getStorageKey('stats'), JSON.stringify({ total: 0, correct: 0, wrong: 0 }));
                 closeStatsModal();
             }
         }
@@ -1177,15 +1379,18 @@
         }
 
         // 渲染假名网格
-        function renderHiraganaGrid() {
+        function renderGrid() {
             const grid = document.getElementById('hiraganaGrid');
-            hiraganaOrder.forEach(char => {
-                const data = hiraganaData[char];
+            grid.innerHTML = '';
+            const order = getCurrentOrder();
+            const data = getCurrentData();
+            order.forEach(char => {
+                const charData = data[char];
                 const card = document.createElement('div');
                 card.className = 'hiragana-card';
                 card.innerHTML = `
                     <div class="hiragana-char">${char}</div>
-                    <div class="hiragana-roma">${data.roma}</div>
+                    <div class="hiragana-roma">${charData.roma}</div>
                 `;
                 card.onclick = () => openModal(char);
                 grid.appendChild(card);
@@ -1194,10 +1399,35 @@
             updateGridErrorMarks();
         }
 
+        // 模式切换
+        function switchMode(mode) {
+            if (currentMode === mode) return;
+            currentMode = mode;
+
+            // 更新标签样式
+            document.querySelectorAll('.mode-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelector(`.mode-tab.${mode}`).classList.add('active');
+
+            // 更新副标题
+            const subtitle = document.getElementById('subtitle');
+            if (mode === 'hiragana') {
+                subtitle.textContent = '平假名 · Hiragana · 优化助记版';
+            } else {
+                subtitle.textContent = '片假名 · Katakana · 优化助记版';
+            }
+
+            // 重新渲染网格
+            renderGrid();
+        }
+
         // 打开详情 Modal
         function openModal(char) {
-            currentIndex = hiraganaOrder.indexOf(char);
-            const data = hiraganaData[char];
+            const order = getCurrentOrder();
+            const allData = getCurrentData();
+            currentIndex = order.indexOf(char);
+            const data = allData[char];
             document.getElementById('modalChar').textContent = char;
             document.getElementById('modalRoma').textContent = data.roma;
             document.getElementById('modalMemory').textContent = data.memory;
@@ -1285,10 +1515,11 @@
 
         function updateQuizModeLabel() {
             const label = document.getElementById('quizModeLabel');
+            const modeName = currentMode === 'hiragana' ? '平假名' : '片假名';
             if (confusionTrainingMode) {
-                label.textContent = '混淆训练模式 - 请选择正确的假名';
+                label.textContent = `${modeName}混淆训练模式 - 请选择正确的假名`;
             } else {
-                label.textContent = '请选择正确的假名';
+                label.textContent = `${modeName}测试 - 请选择正确的假名`;
             }
         }
 
@@ -1299,14 +1530,17 @@
             resultDiv.classList.remove('correct', 'wrong');
 
             // 根据模式选择假名范围
-            const sourceList = confusionTrainingMode ? confusionCharList : hiraganaOrder;
+            const order = getCurrentOrder();
+            const confusionList = getConfusionList();
+            const sourceList = confusionTrainingMode ? confusionList : order;
+            const data = getCurrentData();
 
             // 随机选择一个假名
             const correctChar = sourceList[Math.floor(Math.random() * sourceList.length)];
             currentQuestion = correctChar;
 
             // 显示罗马音
-            document.getElementById('quizTarget').textContent = hiraganaData[correctChar].roma.toUpperCase();
+            document.getElementById('quizTarget').textContent = data[correctChar].roma.toUpperCase();
 
             // 生成选项（1个正确 + 3个错误）
             const options = [correctChar];
@@ -1329,7 +1563,7 @@
                 option.dataset.char = char; // 存储字符数据
                 option.innerHTML = `
                     <div class="quiz-option-char">${char}</div>
-                    <div class="quiz-option-roma">${hiraganaData[char].roma}</div>
+                    <div class="quiz-option-roma">${data[char].roma}</div>
                 `;
                 option.onclick = () => checkAnswer(char, option);
                 optionsContainer.appendChild(option);
@@ -1397,25 +1631,29 @@
         function showErrorBook() {
             const errors = getErrors();
             const errorContent = document.getElementById('errorContent');
+            const data = getCurrentData();
+            const modeName = currentMode === 'hiragana' ? '平假名' : '片假名';
+
+            document.getElementById('errorModalTitle').textContent = `${modeName}错题本`;
 
             if (Object.keys(errors).length === 0) {
                 errorContent.innerHTML = `
                     <div class="empty-state">
                         <div class="empty-icon">✓</div>
-                        <div class="empty-text">还没有错题记录</div>
+                        <div class="empty-text">${modeName}还没有错题记录</div>
                     </div>
                 `;
             } else {
                 const errorList = Object.entries(errors)
                     .sort((a, b) => b[1].count - a[1].count)
-                    .map(([char, data]) => {
+                    .map(([char, errData]) => {
                         return `
                             <div class="error-item">
                                 <div class="error-item-left">
                                     <div class="error-char">${char}</div>
                                     <div class="error-info">
-                                        <div class="error-roma">${hiraganaData[char].roma}</div>
-                                        <div class="error-count">错误 ${data.count} 次</div>
+                                        <div class="error-roma">${data[char].roma}</div>
+                                        <div class="error-count">错误 ${errData.count} 次</div>
                                     </div>
                                 </div>
                                 <div class="error-actions">
@@ -1444,6 +1682,9 @@
         // 学习统计
         function showStats() {
             const stats = getStats();
+            const modeName = currentMode === 'hiragana' ? '平假名' : '片假名';
+
+            document.getElementById('statsModalTitle').textContent = `${modeName}学习统计`;
             document.getElementById('statTotal').textContent = stats.total;
             document.getElementById('statCorrect').textContent = stats.correct;
             document.getElementById('statWrong').textContent = stats.wrong;
@@ -1474,7 +1715,7 @@
         document.getElementById('statsModal').addEventListener('click', closeStatsModal);
 
         // 初始化
-        renderHiraganaGrid();
+        renderGrid();
 
         // 注册 Service Worker
         if ('serviceWorker' in navigator) {
