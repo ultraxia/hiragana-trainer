@@ -560,6 +560,133 @@
             color: #FF3B30;
         }
 
+        /* 输入框样式 */
+        .quiz-input-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .quiz-input {
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+            font-size: 32px;
+            text-align: center;
+            border: 3px solid rgba(0, 122, 255, 0.3);
+            border-radius: 16px;
+            background: rgba(0, 0, 0, 0.02);
+            outline: none;
+            transition: all 0.2s;
+            font-weight: 600;
+        }
+
+        .quiz-input:focus {
+            border-color: #007AFF;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1);
+        }
+
+        .quiz-input.correct {
+            border-color: #34C759;
+            background: rgba(52, 199, 89, 0.1);
+        }
+
+        .quiz-input.wrong {
+            border-color: #FF3B30;
+            background: rgba(255, 59, 48, 0.1);
+        }
+
+        .quiz-input-hint {
+            font-size: 14px;
+            color: #86868b;
+            text-align: center;
+        }
+
+        /* 混淆对决模式提示 */
+        .confusion-candidates {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-top: 16px;
+            padding: 16px;
+            background: rgba(255, 149, 0, 0.08);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 149, 0, 0.2);
+        }
+
+        .confusion-candidate {
+            font-size: 48px;
+            font-weight: 600;
+            color: #1d1d1f;
+            padding: 8px 16px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .quiz-submit-btn {
+            padding: 16px 48px;
+            font-size: 18px;
+            font-weight: 600;
+            background: #007AFF;
+            color: white;
+            border: none;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .quiz-submit-btn:hover {
+            background: #0051D5;
+            transform: scale(1.02);
+        }
+
+        .quiz-submit-btn:active {
+            transform: scale(0.98);
+        }
+
+        .quiz-submit-btn:disabled {
+            background: #86868b;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* 交互模式切换 */
+        .quiz-interaction-tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: 20px;
+            background: rgba(120, 120, 128, 0.12);
+            border-radius: 10px;
+            padding: 3px;
+        }
+
+        .quiz-interaction-tab {
+            flex: 1;
+            background: transparent;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 16px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #86868b;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .quiz-interaction-tab:hover {
+            color: #1d1d1f;
+        }
+
+        .quiz-interaction-tab.active {
+            background: white;
+            color: #1d1d1f;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+        }
+
         .quiz-result {
             padding: 12px;
             border-radius: 12px;
@@ -826,6 +953,15 @@
                 min-height: 70px;
             }
 
+            .quiz-input {
+                font-size: 24px;
+                padding: 16px;
+            }
+
+            .confusion-candidate {
+                font-size: 36px;
+            }
+
             .quiz-options {
                 grid-template-columns: 1fr;
             }
@@ -926,14 +1062,27 @@
         <div class="modal-content" onclick="event.stopPropagation()">
             <button class="close-btn" onclick="closeQuizModal()">&times;</button>
             <div class="quiz-container">
+                <!-- 交互模式切换 -->
+                <div class="quiz-interaction-tabs">
+                    <button class="quiz-interaction-tab active" id="quizInteractionInput" onclick="switchInteractionMode('input')">输入模式</button>
+                    <button class="quiz-interaction-tab" id="quizInteractionChoice" onclick="switchInteractionMode('choice')">选择模式</button>
+                </div>
                 <!-- 出题模式切换 -->
                 <div class="quiz-type-tabs">
-                    <button class="quiz-type-tab active" id="quizTypeRomaToKana" onclick="switchQuizType('roma-to-kana')">罗马音 → 假名</button>
-                    <button class="quiz-type-tab" id="quizTypeKanaToRoma" onclick="switchQuizType('kana-to-roma')">假名 → 罗马音</button>
+                    <button class="quiz-type-tab active" id="quizTypeKanaToRoma" onclick="switchQuizType('kana-to-roma')">假名 → 罗马音</button>
+                    <button class="quiz-type-tab" id="quizTypeRomaToKana" onclick="switchQuizType('roma-to-kana')">罗马音 → 假名</button>
                 </div>
-                <div class="quiz-question" id="quizModeLabel">请选择正确的假名</div>
+                <div class="quiz-question" id="quizModeLabel">请输入罗马音</div>
                 <div class="quiz-target" id="quizTarget"></div>
-                <div class="quiz-options" id="quizOptions"></div>
+                <!-- 输入框容器 -->
+                <div class="quiz-input-container" id="quizInputContainer" style="display: flex;">
+                    <input type="text" class="quiz-input" id="quizInput" placeholder="输入答案..." autocomplete="off">
+                    <div class="quiz-input-hint">按 Enter 提交 · 按 Esc 跳过</div>
+                    <!-- 混淆对决候选假名 -->
+                    <div class="confusion-candidates" id="confusionCandidates" style="display: none;"></div>
+                </div>
+                <!-- 选择题选项容器 -->
+                <div class="quiz-options" id="quizOptions" style="display: none;"></div>
                 <div class="quiz-result hidden" id="quizResult"></div>
                 <div class="quiz-stats">
                     <div class="quiz-stat">
@@ -1005,7 +1154,8 @@
         let currentMode = 'hiragana'; // 'hiragana' 或 'katakana'
         let currentIndex = null;
         let confusionTrainingMode = false;
-        let quizType = 'roma-to-kana'; // 'roma-to-kana' 或 'kana-to-roma'
+        let quizType = 'kana-to-roma'; // 'roma-to-kana' 或 'kana-to-roma'
+        let interactionMode = 'input'; // 'input' 或 'choice'
 
         // 易混淆假名列表（用于混淆训练模式）
         const hiraganaConfusionList = ["ね", "れ", "わ", "さ", "ち", "ま", "ほ", "ら", "ろ", "る", "り"];
@@ -1540,6 +1690,61 @@
         // 点击背景关闭
         document.getElementById('modalOverlay').addEventListener('click', closeModal);
 
+        // 罗马音容错匹配
+        function normalizeRomaji(input) {
+            const normalized = input.toLowerCase().trim();
+            const variants = {
+                'si': 'shi',
+                'ti': 'chi',
+                'tu': 'tsu',
+                'hu': 'fu',
+                'zi': 'ji',
+                'di': 'ji',
+                'du': 'zu',
+                'sya': 'sha',
+                'syu': 'shu',
+                'syo': 'sho',
+                'tya': 'cha',
+                'tyu': 'chu',
+                'tyo': 'cho',
+                'zya': 'ja',
+                'zyu': 'ju',
+                'zyo': 'jo',
+                'wo': 'o'
+            };
+            return variants[normalized] || normalized;
+        }
+
+        // 交互模式切换
+        function switchInteractionMode(mode) {
+            if (interactionMode === mode) return;
+            interactionMode = mode;
+
+            // 更新标签样式
+            document.getElementById('quizInteractionInput').classList.remove('active');
+            document.getElementById('quizInteractionChoice').classList.remove('active');
+            if (mode === 'input') {
+                document.getElementById('quizInteractionInput').classList.add('active');
+            } else {
+                document.getElementById('quizInteractionChoice').classList.add('active');
+            }
+
+            // 切换显示
+            const inputContainer = document.getElementById('quizInputContainer');
+            const optionsContainer = document.getElementById('quizOptions');
+            if (mode === 'input') {
+                inputContainer.style.display = 'flex';
+                optionsContainer.style.display = 'none';
+            } else {
+                inputContainer.style.display = 'none';
+                optionsContainer.style.display = 'grid';
+            }
+
+            // 更新标签文字并出下一题
+            updateQuizModeLabel();
+            nextQuestion();
+        }
+
         // 混淆训练模式切换
         function toggleConfusionTraining() {
             confusionTrainingMode = !confusionTrainingMode;
@@ -1592,7 +1797,13 @@
         function updateQuizModeLabel() {
             const label = document.getElementById('quizModeLabel');
             const modeName = currentMode === 'hiragana' ? '平假名' : '片假名';
-            const questionType = quizType === 'roma-to-kana' ? '请选择正确的假名' : '请选择正确的罗马音';
+
+            let questionType;
+            if (interactionMode === 'input') {
+                questionType = quizType === 'roma-to-kana' ? '请输入对应的假名' : '请输入罗马音';
+            } else {
+                questionType = quizType === 'roma-to-kana' ? '请选择正确的假名' : '请选择正确的罗马音';
+            }
 
             if (confusionTrainingMode) {
                 label.textContent = `${modeName}混淆训练 - ${questionType}`;
@@ -1607,6 +1818,12 @@
             resultDiv.classList.add('hidden');
             resultDiv.classList.remove('correct', 'wrong');
 
+            // 清空并重置输入框
+            const inputElement = document.getElementById('quizInput');
+            inputElement.value = '';
+            inputElement.classList.remove('correct', 'wrong');
+            inputElement.disabled = false;
+
             // 根据模式选择假名范围
             const order = getCurrentOrder();
             const confusionList = getConfusionList();
@@ -1620,35 +1837,94 @@
             const optionsContainer = document.getElementById('quizOptions');
             optionsContainer.innerHTML = '';
 
+            // 输入模式
+            if (interactionMode === 'input') {
+                const confusionCandidatesDiv = document.getElementById('confusionCandidates');
+
+                if (quizType === 'kana-to-roma') {
+                    // 显示假名，输入罗马音
+                    document.getElementById('quizTarget').textContent = correctChar;
+                    inputElement.placeholder = '输入罗马音...';
+
+                    // 混淆对决模式：显示候选假名
+                    if (confusionTrainingMode) {
+                        const candidates = [correctChar];
+                        // 添加2-3个其他混淆假名
+                        while (candidates.length < Math.min(4, sourceList.length)) {
+                            const randomChar = sourceList[Math.floor(Math.random() * sourceList.length)];
+                            if (!candidates.includes(randomChar)) {
+                                candidates.push(randomChar);
+                            }
+                        }
+                        // 打乱顺序
+                        candidates.sort(() => Math.random() - 0.5);
+
+                        confusionCandidatesDiv.innerHTML = candidates.map(char =>
+                            `<div class="confusion-candidate">${char}</div>`
+                        ).join('');
+                        confusionCandidatesDiv.style.display = 'flex';
+                    } else {
+                        confusionCandidatesDiv.style.display = 'none';
+                    }
+                } else {
+                    // 显示罗马音，输入假名
+                    document.getElementById('quizTarget').textContent = data[correctChar].roma.toUpperCase();
+                    inputElement.placeholder = '输入假名...';
+
+                    // 混淆对决模式：显示候选假名
+                    if (confusionTrainingMode) {
+                        const candidates = [correctChar];
+                        while (candidates.length < Math.min(4, sourceList.length)) {
+                            const randomChar = sourceList[Math.floor(Math.random() * sourceList.length)];
+                            if (!candidates.includes(randomChar)) {
+                                candidates.push(randomChar);
+                            }
+                        }
+                        candidates.sort(() => Math.random() - 0.5);
+
+                        confusionCandidatesDiv.innerHTML = candidates.map(char =>
+                            `<div class="confusion-candidate">${char}</div>`
+                        ).join('');
+                        confusionCandidatesDiv.style.display = 'flex';
+                    } else {
+                        confusionCandidatesDiv.style.display = 'none';
+                    }
+                }
+                // 自动聚焦输入框
+                setTimeout(() => inputElement.focus(), 100);
+                return;
+            }
+
+            // 选择模式
             if (quizType === 'roma-to-kana') {
                 // 模式1：显示罗马音，选择假名
                 document.getElementById('quizTarget').textContent = data[correctChar].roma.toUpperCase();
 
-                // 生成选项（1个正确 + 3个错误）
-                const options = [correctChar];
-                while (options.length < 4) {
-                    const randomChar = sourceList[Math.floor(Math.random() * sourceList.length)];
-                    if (!options.includes(randomChar)) {
-                        options.push(randomChar);
-                    }
+            // 生成选项（1个正确 + 3个错误）
+            const options = [correctChar];
+            while (options.length < 4) {
+                const randomChar = sourceList[Math.floor(Math.random() * sourceList.length)];
+                if (!options.includes(randomChar)) {
+                    options.push(randomChar);
                 }
+            }
 
-                // 打乱选项顺序
-                options.sort(() => Math.random() - 0.5);
+            // 打乱选项顺序
+            options.sort(() => Math.random() - 0.5);
 
-                // 渲染选项
-                options.forEach(char => {
-                    const option = document.createElement('div');
-                    option.className = 'quiz-option';
+            // 渲染选项
+            options.forEach(char => {
+                const option = document.createElement('div');
+                option.className = 'quiz-option';
                     option.dataset.char = char;
                     option.dataset.roma = data[char].roma;
-                    option.innerHTML = `
-                        <div class="quiz-option-char">${char}</div>
+                option.innerHTML = `
+                    <div class="quiz-option-char">${char}</div>
                         <div class="quiz-option-roma">${data[char].roma}</div>
-                    `;
-                    option.onclick = () => checkAnswer(char, option);
-                    optionsContainer.appendChild(option);
-                });
+                `;
+                option.onclick = () => checkAnswer(char, option);
+                optionsContainer.appendChild(option);
+            });
             } else {
                 // 模式2：显示假名，选择罗马音
                 document.getElementById('quizTarget').textContent = correctChar;
@@ -1681,6 +1957,71 @@
                     option.onclick = () => checkAnswerRoma(roma, option, correctRoma);
                     optionsContainer.appendChild(option);
                 });
+            }
+        }
+
+        // 检查输入答案
+        function checkInputAnswer() {
+            const inputElement = document.getElementById('quizInput');
+            const userInput = inputElement.value.trim();
+
+            if (!userInput) {
+                return; // 空输入不处理
+            }
+
+            const data = getCurrentData();
+            let isCorrect = false;
+
+            if (quizType === 'kana-to-roma') {
+                // 假名 → 罗马音模式：支持容错
+                const correctRoma = data[currentQuestion].roma;
+                const normalizedInput = normalizeRomaji(userInput);
+                const normalizedCorrect = normalizeRomaji(correctRoma);
+                isCorrect = normalizedInput === normalizedCorrect;
+            } else {
+                // 罗马音 → 假名模式：完全匹配
+                isCorrect = userInput === currentQuestion;
+            }
+
+            // 禁用输入框
+            inputElement.disabled = true;
+
+            // 标记输入框
+            if (isCorrect) {
+                inputElement.classList.add('correct');
+                quizSessionStats.correct++;
+            } else {
+                inputElement.classList.add('wrong');
+                quizSessionStats.wrong++;
+                saveError(currentQuestion);
+            }
+
+            // 更新统计
+            updateStats(isCorrect);
+            updateQuizStats();
+
+            // 显示结果
+            const resultDiv = document.getElementById('quizResult');
+            resultDiv.classList.remove('hidden');
+            resultDiv.className = `quiz-result ${isCorrect ? 'correct' : 'wrong'}`;
+
+            if (isCorrect) {
+                resultDiv.textContent = '✓ 回答正确！';
+            } else {
+                if (quizType === 'kana-to-roma') {
+                    resultDiv.textContent = `✗ 回答错误！正确答案是：${data[currentQuestion].roma}`;
+                } else {
+                    resultDiv.textContent = `✗ 回答错误！正确答案是：${currentQuestion}`;
+                }
+            }
+
+            // 如果回答正确，800ms后自动进入下一题
+            if (isCorrect) {
+                setTimeout(() => {
+                    if (document.getElementById('quizModal').classList.contains('active')) {
+                        nextQuestion();
+                    }
+                }, 800);
             }
         }
 
@@ -1864,11 +2205,34 @@
 
         // 键盘快捷键
         document.addEventListener('keydown', (e) => {
+            // ESC 关闭所有弹窗
             if (e.key === 'Escape') {
                 closeModal();
                 closeQuizModal();
                 closeErrorModal();
                 closeStatsModal();
+            }
+
+            // 如果测验弹窗打开且处于输入模式
+            if (document.getElementById('quizModal').classList.contains('active') && interactionMode === 'input') {
+                const inputElement = document.getElementById('quizInput');
+
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    // 如果输入框已禁用（已答题），进入下一题
+                    if (inputElement.disabled) {
+                        nextQuestion();
+                    } else {
+                        // 否则提交答案
+                        checkInputAnswer();
+                    }
+                } else if (e.key === 'Escape') {
+                    e.preventDefault();
+                    // 跳过当前题目
+                    if (!inputElement.disabled) {
+                        nextQuestion();
+                    }
+                }
             }
         });
 
